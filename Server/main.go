@@ -1,35 +1,45 @@
 package main
 
 import (
-	"mini-drive/initializers"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
+
+	"mini-drive/controllers"
+	"mini-drive/initializers"
+	"mini-drive/middleware"
 )
 
-func main() {
-	// Connect to database
+func Initialize() {
+	initializers.LoadEnvVar()
 	initializers.ConnectToDB()
+	initializers.SyncDB()
+}
 
-	// Initialize Echo
+func main() {
+	Initialize()
+
 	e := echo.New()
 
-	// Middleware
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	e.Use(echoMiddleware.Logger())
+	e.Use(echoMiddleware.Recover())
 
-	// CORS usually helps in dev
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"}, // Adjust for production
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowCredentials: true,
 	}))
 
-	// Routes
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello World from Mini-Drive Check!")
+		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	// Start server
+	e.POST("/signup", controllers.Signup)
+	e.POST("/login", controllers.Login)
+	e.POST("/logout", controllers.Logout)
+	e.GET("/validate", controllers.Validate, middleware.RequireAuth)
+
 	e.Logger.Fatal(e.Start(":3000"))
 }

@@ -1,0 +1,20 @@
+Mini-Drive/
+├── uploads/                 🆕 (مجلد فارغ ستُخزن فيه الملفات فعلياً)
+├── controllers/
+│   ├── usersController.go   (Signup, Login, Logout, Validate)
+│   └── filesController.go   🆕 (Upload, List Files, Download, Delete)
+├── initializers/
+│   ├── connectToDB.go
+│   ├── syncDatabase.go
+│   └── loadEnvVariables.go
+├── middleware/
+│   └── requireAuth.go       (لحماية راوتر الملفات)
+├── models/
+│   ├── userModel.go         (سنعدله لإضافة علاقة HasMany)
+│   └── fileModel.go         🆕 (جدول الملفات الجديد)
+├── main.go                  (تجميع الروابط الجديدة)
+├── .env
+├── .gitignore               🆕 (مهم جداً هنا)
+├── docker-compose.yml
+├── Dockerfile
+└── go.mod
