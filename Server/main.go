@@ -41,5 +41,14 @@ func main() {
 	e.POST("/logout", controllers.Logout)
 	e.GET("/validate", controllers.Validate, middleware.RequireAuth)
 
+	filesGroup := e.Group("/files")
+	filesGroup.Use(middleware.RequireAuth)
+
+	filesGroup.POST("/upload", controllers.UploadFile)
+	filesGroup.GET("/list", controllers.ListFiles)
+	filesGroup.GET("/download/:id", controllers.DownloadFile)
+	filesGroup.DELETE("/delete/:id", controllers.DeleteFile)
+	filesGroup.GET("/metadata/:id", controllers.GetFileMetadata)
+
 	e.Logger.Fatal(e.Start(":3000"))
 }

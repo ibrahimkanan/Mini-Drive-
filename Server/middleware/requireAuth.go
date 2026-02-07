@@ -9,7 +9,7 @@ import (
 	"mini-drive/initializers"
 	"mini-drive/models"
 
-	"github.com/golang-jwt/jwt/v4"	
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -41,21 +41,26 @@ func RequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 		// 4. Extract Claims & User
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			// Check Expiration
-			if float64(time.Now().Unix()) > claims["exp"].(float64) {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Token expired")
+			if exp, ok := claims["exp"].(float64); ok {
+				if float64(time.Now().Unix()) > exp {
+					return echo.NewHTTPError(http.StatusUnauthorized, "Token expired")
+				}
+			} else {
+				// Handle case where exp is missing or not a float64
+				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token claims: missing expiration")
 			}
 
 			// Find User
 			var user models.User
 			// Find the user by id
-			initializers.DB.First(&user, claims["id"]) 
+			initializers.DB.First(&user, claims["id"])
 
 			if user.ID == 0 {
 				return echo.NewHTTPError(http.StatusUnauthorized, "User not found")
 			}
 
 			// 5. Attach to Context
-			c.Set("user", user)
+			c.Set("user", &user)
 			return next(c)
 		}
 
