@@ -1,30 +1,48 @@
 version: '3.8'
 
 services:
-
+  # ⚙️ Backend Service
   app:
     container_name: mini-drive-app
-    build: ./Server        
+    build: ./Server      # تأكد أن اسم المجلد عندك يبدأ بحرف كبير فعلاً
     ports:
       - "3000:3000"
     depends_on:
       - db
-    restart: always                
+    restart: always
     environment:
-      - DB_HOST=db         
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=minidrive_db
-      - DB_PORT=5432
+      - PORT=3000
+      # جمعنا متغيرات الداتابيس في رابط واحد أسهل لـ GORM
+      - DB_URL=host=db user=postgres password=postgres dbname=minidrive_db port=5432 sslmode=disable
     volumes:
-      - uploads_data:/app/uploads
+      - ./Server/uploads:/app/uploads
 
+  # 🎨 Frontend Service (Next.js)
+  client:
+    container_name: mini-drive-client
+    build: ./Client      # تأكد أن اسم المجلد عندك يبدأ بحرف كبير فعلاً
+    ports:
+      - "3002:3000"      # المتصفح: http://localhost:3002
+    depends_on:
+      - app
+    restart: always
+    environment:
+      # هذا الرابط للمتصفح (Client Side)
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+      # تفعيل نظام مراقبة الملفات لويندوز (عشان التحديث التلقائي)
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./Client:/app
+      # 👇👇 خدعة التسريع (تمنع نسخ مكتبات النود للويندوز) 👇👇
+      - /app/node_modules
+      - /app/.next
 
+  # 🗄️ Database Service
   db:
     image: postgres:15-alpine
     container_name: postgres-db
     ports:
-      - "5435:5432"
+      - "5435:5432"      # DBeaver Connect: localhost:5435
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -32,9 +50,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-
 volumes:
   postgres_data:
-    driver: local
-  uploads_data:
     driver: local
