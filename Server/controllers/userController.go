@@ -100,8 +100,8 @@ func Login(c echo.Context) error {
 		Name:     "Authorization",
 		Value:    token,
 		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
+		Secure:   false, // Set to false for HTTP (localhost)
+		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(time.Hour * 24 * 30),
 	})
 
@@ -115,8 +115,8 @@ func Logout(c echo.Context) error {
 		Name:     "Authorization",
 		Value:    "",
 		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(-time.Hour),
 	})
 

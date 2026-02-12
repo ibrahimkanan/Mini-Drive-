@@ -8,12 +8,13 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - db
+      database:
+        condition: service_healthy
     restart: always
     environment:
       - PORT=3000
       # جمعنا متغيرات الداتابيس في رابط واحد أسهل لـ GORM
-      - DB_URL=host=db user=postgres password=postgres dbname=minidrive_db port=5432 sslmode=disable
+      - DB_URL=host=database user=postgres password=postgres dbname=minidrive_db port=5432 sslmode=disable
     volumes:
       - ./Server/uploads:/app/uploads
 
@@ -22,7 +23,7 @@ services:
     container_name: mini-drive-client
     build: ./Client      # تأكد أن اسم المجلد عندك يبدأ بحرف كبير فعلاً
     ports:
-      - "3002:3000"      # المتصفح: http://localhost:3002
+      - "3002:3001"      # المتصفح: http://localhost:3002
     depends_on:
       - app
     restart: always
@@ -38,7 +39,7 @@ services:
       - /app/.next
 
   # 🗄️ Database Service
-  db:
+  database:
     image: postgres:15-alpine
     container_name: postgres-db
     ports:
@@ -46,7 +47,12 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: minidrive_db  
+      POSTGRES_DB: minidrive_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

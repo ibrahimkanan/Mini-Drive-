@@ -1,18 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import api from '@/lib/api'; // سيعمل بشكل صحيح
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import api from "@/lib/api"; // سيعمل بشكل صحيح
+import Link from "next/link";
 
 export default function Home() {
-  const [message, setMessage] = useState('Checking connection...');
+  const [message, setMessage] = useState("Checking connection...");
 
   useEffect(() => {
-    api.get('/')
-      .then(() => setMessage('✅ Connected to Go Backend!'))
-      .catch((err) => {
+    api
+      .get("/")
+      .then(() => setMessage("✅ Connected to Go Backend!"))
+      .catch((err: unknown) => {
         console.error(err);
-        setMessage('❌ Connection Failed (Check CORS or Port)');
+        setMessage("❌ Connection Failed (Check CORS or Port)");
       });
   }, []);
 
@@ -22,9 +23,9 @@ export default function Home() {
       <div className="text-2xl font-mono border p-4 rounded bg-gray-100 text-black">
         {message}
       </div>
-      
+
       <div className="mt-8">
-        <Link 
+        <Link
           href="/dashboard"
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 shadow-md"
         >
